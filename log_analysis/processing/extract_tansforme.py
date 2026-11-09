@@ -1,9 +1,11 @@
-import logging
-import re
 """
     in : list of rows
     out : datetime, ip, user, failed, invalid user for sshd service, success
 """
+
+import logging
+import re
+
 logger = logging.getLogger(__name__)
 pattern = re.compile(r'(?P<month>\w{3})\s+(?P<day>\d{1,2})\s+(?P<time>\d{2}:\d{2}:\d{2})\s+(?P<server>\w+)\s+(?P<service>\w+)\[\d+\]:\s+(?P<message>.+)')
 # Pour trouver l'adresse IP dans le message
@@ -12,13 +14,14 @@ IP_PATTERN = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
 USER_PATTERN = re.compile(r'(for|user) (?P<user>\S*) from')
 
 def classify_event(message):
-    
+
     lowered = message.lower()
     if "accepted password" in lowered or "accepted publickey" in lowered:
         return "Success"
     if "failed password" in lowered:
         return "Failed"
-    if "invalid user" in lowered:
+    # Seule la ligne qui COMMENCE par "Invalid user" est une vraie tentative
+    if lowered.startswith("invalid user"):
         return "Invalid"
     return None
 
@@ -89,6 +92,8 @@ def count_by_ip(records):
             counts[ip] = {'Success': 0, 'Failed': 0, 'Invalid': 0}
         counts[ip][r['status']] += 1
     return counts
+
+
 if __name__ == "__main__":
     from ingestion import raw
 
