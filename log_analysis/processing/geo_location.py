@@ -1,10 +1,10 @@
-import logging
-import requests
-
 """
     in : ip
     out : location (country) of the ip
 """
+
+import logging
+import requests
 
 URL_TPINFO = 'https://ipinfo.io'
 
