@@ -89,7 +89,6 @@ def count_by_ip(records):
             counts[ip] = {'Success': 0, 'Failed': 0, 'Invalid': 0}
         counts[ip][r['status']] += 1
     return counts
-
 if __name__ == "__main__":
     from ingestion import raw
 
