@@ -1,12 +1,13 @@
+"""
+    in : list of records (from extract_tansforme.extract)
+    out : 3 graphs (PNG) in output/
+"""
+
 import logging
 from pathlib import Path
 import matplotlib.pyplot as plt
 from processing import extract_tansforme, geo_location
 
-"""
-    in : list of records (from extract_tansforme.extract)
-    out : 3 graphs (PNG) in output/
-"""
 logger = logging.getLogger(__name__)
 
 
