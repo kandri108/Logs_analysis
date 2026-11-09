@@ -1,30 +1,22 @@
-import gzip
-import logging
-import os
-from pathlib import Path
-
 """
 Read from data all files
 in: data [directory]
 out: list of rows
 """
 
+import gzip
+import logging
+import os
+
 logger = logging.getLogger(__name__)
-
-
-def is_gzip(file_path):
-    # Un fichier gzip commence toujours par les octets 1f 8b
-    with open(file_path, 'rb') as f:
-        return f.read(2) == b'\x1f\x8b'
 
 
 def to_rows(path: str):
 
-    data_dir = Path(path)
     rows = []
 
     try:
-        files = sorted(os.listdir(data_dir))
+        files = sorted(os.listdir(path))
 
     except FileNotFoundError:
         logger.error(path + " : dossier introuvable")
@@ -38,17 +30,18 @@ def to_rows(path: str):
 
         file_path = path + '/' + file
 
+        # On ignore les dossiers (par exemple auth.tar)
         if not os.path.isfile(file_path):
             continue
 
         try:
-            if is_gzip(file_path):
-                f = gzip.open(file_path, mode='rt', errors='replace')
+            # Un fichier qui finit par .gz est compressé : on l'ouvre avec gzip
+            if file.endswith('.gz'):
+                with gzip.open(file_path, mode='rt', encoding='utf-8', errors='replace') as f:
+                    lines = f.readlines()
             else:
-                f = open(file_path, errors='replace')
-
-            with f:
-                lines = f.readlines()
+                with open(file_path, encoding='utf-8', errors='replace') as f:
+                    lines = f.readlines()
 
             rows.extend(lines)
             logger.info(file + " : " + str(len(lines)) + " lignes lues")
@@ -58,6 +51,9 @@ def to_rows(path: str):
 
         except gzip.BadGzipFile:
             logger.error(file + " : fichier gzip corrompu")
+
+        except EOFError:
+            logger.error(file + " : fichier gzip incomplet")
 
         except OSError as e:
             logger.error(file + " : erreur de lecture (" + str(e) + ")")
