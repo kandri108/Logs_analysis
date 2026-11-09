@@ -75,7 +75,14 @@ def count_by_country(records, status):
                 ip_counts[ip] = 1
 
     # 2. On garde les MAX_IPS IP qui ont le plus de tentatives
-    top_ips = sorted(ip_counts, key=ip_counts.get, reverse=True)[:MAX_IPS]
+    pairs = []
+    for ip in ip_counts:
+        pairs.append((ip_counts[ip], ip))
+    pairs.sort(reverse=True)
+
+    top_ips = []
+    for pair in pairs[:MAX_IPS]:
+        top_ips.append(pair[1])
 
     # 3. Nombre de tentatives par pays
     counts = {}
